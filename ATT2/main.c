@@ -19,25 +19,22 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include "ST7789\st7789.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "ST7789/st7789.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-	void MainMenu (void);
-	void DifficultyBomb (void);
-	void MineField (void);
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define BTNUP  ((HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_12))==(GPIO_PIN_RESET))
-#define BTNDOWN  ((HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_10))==(GPIO_PIN_RESET))
-#define BTNLEFT  ((HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_9))==(GPIO_PIN_RESET))
-#define BTNRIGHT  ((HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_11))==(GPIO_PIN_RESET))
+#define BTNUP  HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_12) == GPIO_PIN_RESET
+#define BTNDOWN  HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10) == GPIO_PIN_RESET
+#define BTNLEFT  HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_9) == GPIO_PIN_RESET
+#define BTNRIGHT  HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_11) == GPIO_PIN_RESET
 #define LED6_ON  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3,1)
 #define LED6_OFF HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3, 0)
 /* USER CODE END PD */
@@ -81,7 +78,8 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+
+	HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -99,15 +97,14 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   ST7789_Init();
-  ///MainMenu();
-  MineField();
+  MainMenu();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
- // MainMenu();
+//	  MainMenu();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -130,9 +127,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -141,12 +136,12 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     Error_Handler();
   }
@@ -229,7 +224,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pins : BTNLEFT_Pin BTNDOWN_Pin BTNRIGHT_Pin BTNUP_Pin */
   GPIO_InitStruct.Pin = BTNLEFT_Pin|BTNDOWN_Pin|BTNRIGHT_Pin|BTNUP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 }
@@ -246,7 +241,6 @@ void MainMenu (void)
 	ST7789_WriteString(65,100," Play (UP) ", Font_11x18,CYAN, BLACK);
 	ST7789_WriteString(20,140," Difficulty (DOWN) ", Font_11x18,CYAN, BLACK);
 	ST7789_WriteString(35,180," Confirm (RIGHT) ", Font_11x18,CYAN, BLACK);
-	choice_menu=0;
 
 		if(BTNUP == 1)
 			{
@@ -289,18 +283,16 @@ void MainMenu (void)
 
 void DifficultyBomb (void)
 {
-	ST7789_WriteString(25,20," Mine Field ", Font_16x26, BLACK, CYAN);
-	ST7789_WriteString(40,75," Easy - 4 bombs ", Font_11x18, WHITE, BLACK);
-	ST7789_WriteString(90,95," (UP) ", Font_11x18, WHITE, BLACK);
-	ST7789_WriteString(30,120," Medium - 8 bombs ", Font_11x18, WHITE, BLACK);
-	ST7789_WriteString(80,145," (LEFT) ", Font_11x18, WHITE, BLACK);
-	ST7789_WriteString(40,165," Hard - 12 bombs ", Font_11x18, WHITE, BLACK);
-	ST7789_WriteString(80,185," (DOWN) ", Font_11x18, WHITE, BLACK);
-	ST7789_WriteString(60,220," Confirm (RIGHT) ", Font_7x10, WHITE, BLACK);
-	choice_bomb = 0;
-
 	while (confirm_bomb == 0)
 		{
+			ST7789_WriteString(25,20," Mine Field ", Font_16x26, BLACK, CYAN);
+			ST7789_WriteString(40,75," Easy - 4 bombs ", Font_11x18, WHITE, BLACK);
+			ST7789_WriteString(90,95," (UP) ", Font_11x18, WHITE, BLACK);
+			ST7789_WriteString(30,120," Medium - 8 bombs ", Font_11x18, WHITE, BLACK);
+			ST7789_WriteString(80,145," (LEFT) ", Font_11x18, WHITE, BLACK);
+			ST7789_WriteString(40,165," Hard - 12 bombs ", Font_11x18, WHITE, BLACK);
+			ST7789_WriteString(80,185," (DOWN) ", Font_11x18, WHITE, BLACK);
+			ST7789_WriteString(60,220," Confirm (RIGHT) ", Font_7x10, WHITE, BLACK);
 
 			if(BTNUP == 1)
 			{
@@ -319,20 +311,14 @@ void DifficultyBomb (void)
 			{
 				case 1:
 					ST7789_WriteString(40,75," Easy - 4 bombs ", Font_11x18, BLACK, CYAN);
-					ST7789_WriteString(30,120," Medium - 8 bombs ", Font_11x18, WHITE, BLACK);
-					ST7789_WriteString(40,165," Hard - 12 bombs ", Font_11x18, WHITE, BLACK);
 				break;
 
 				case 2:
 					ST7789_WriteString(30,120," Medium - 8 bombs ", Font_11x18, BLACK, CYAN);
-					ST7789_WriteString(40,75," Easy - 4 bombs ", Font_11x18, WHITE, BLACK);
-					ST7789_WriteString(40,165," Hard - 12 bombs ", Font_11x18, WHITE, BLACK);
 				break;
 
 				case 3:
 					ST7789_WriteString(40,165," Hard - 12 bombs ", Font_11x18, BLACK, CYAN);
-					ST7789_WriteString(30,120," Medium - 8 bombs ", Font_11x18, WHITE, BLACK);
-					ST7789_WriteString(40,75," Easy - 4 bombs ", Font_11x18, WHITE, BLACK);
 				break;
 			}
 
@@ -363,10 +349,6 @@ void DifficultyBomb (void)
 }
 void MineField (void)
 {
-	//ST7789_DrawFilledRectangle(0, 0, 240, 30, GREEN);
-	//ST7789_DrawFilledRectangle(0, 30, 5, 210, GREEN);
-	//ST7789_DrawFilledRectangle(235, 30, 240, 240, GREEN);
-	ST7789_DrawFilledRectangle(0, 235, 240, 240, GREEN);
 
 }
 void BombMark (void)
