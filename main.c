@@ -29,7 +29,9 @@
 /* USER CODE BEGIN PTD */
 	void MainMenu (void);
 	void DifficultyBomb (void);
-	void MineField (void);
+	void DrawMineField (void);
+	void DrawBomb (void);
+	int CheckCoord (int x, int y);
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -99,18 +101,15 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   ST7789_Init();
-  ///MainMenu();
-  MineField();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
- // MainMenu();
     /* USER CODE END WHILE */
-
     /* USER CODE BEGIN 3 */
+	  MainMenu();
   }
   /* USER CODE END 3 */
 }
@@ -239,149 +238,178 @@ int choice_menu = 0;
 int confirm_choice = 0;
 int choice_bomb = 0;
 int confirm_bomb = 0;
-void MainMenu (void)
+int bombs = 0;
+int i;
+int j;
+int x_bomb;
+int y_bomb;
+int coord_bombs[bombs][2];
+
+void MainMenu()
 {
-	ST7789_Fill_Color(BLACK);
-	ST7789_WriteString(45,20,"Mine Field", Font_16x26,CYAN, BLACK);
-	ST7789_WriteString(65,100," Play (UP) ", Font_11x18,CYAN, BLACK);
-	ST7789_WriteString(20,140," Difficulty (DOWN) ", Font_11x18,CYAN, BLACK);
-	ST7789_WriteString(35,180," Confirm (RIGHT) ", Font_11x18,CYAN, BLACK);
-	choice_menu=0;
+	ST7789_WriteString(25,20," Mine Field ", Font_16x26, BLACK, GREEN);
+	ST7789_WriteString(60,95," Play (UP) ", Font_11x18, WHITE, BLACK);
+	ST7789_WriteString(20,130," Difficulty (DOWN) ", Font_11x18, WHITE, BLACK);
+	ST7789_WriteString(55,200," Confirm (RIGHT) ", Font_7x10, WHITE, BLACK);
 
-		if(BTNUP == 1)
-			{
-				choice_menu = 1;
-			}
-			else if(BTNDOWN == 1)
-			{
-				choice_menu = 2;
-			}
+	if(BTNUP == 1)
+		choice_menu = 1;
 
-			switch(choice_menu)
-			{
-				case 1:
-					ST7789_WriteString(65,100," Play (UP) ", Font_11x18, BLACK, CYAN);
-				break;
+	else if(BTNDOWN == 1)
+		choice_menu = 2;
 
-				case 2:
-					ST7789_WriteString(20,140," Difficulty (DOWN) ", Font_11x18, BLACK, CYAN);
-				break;
-			}
+	switch(choice_menu)
+	{
+		case 1:
+			ST7789_WriteString(60,95," Play (UP) ", Font_11x18, BLACK, LIGHTGREEN);
+		break;
 
-			if(BTNRIGHT == 1)
-			{
-				confirm_choice = 1;
-			}
+		case 2:
+			ST7789_WriteString(20,130," Difficulty (DOWN) ", Font_11x18, BLACK, LIGHTGREEN);
+		break;
+	}
 
-			if(choice_menu == 1 && confirm_choice == 1)
-			{
-				confirm_choice = 0;
-				ST7789_Fill_Color(BLACK);
-			}
-			else if (choice_menu == 2 && confirm_choice == 1)
-			{
-				confirm_choice = 0;
-				ST7789_Fill_Color(BLACK);
-			}
-			ST7789_Fill_Color(BLACK);
-			DifficultyBomb();
+	if(BTNRIGHT == 1)
+		confirm_choice = 1;
+
+	if(choice_menu == 1 && confirm_choice == 1)
+	{
+		confirm_choice = 0;
+		ST7789_Fill_Color(BLACK);
+		DrawBomb();
+	}
+	else if (choice_menu == 2 && confirm_choice == 1)
+	{
+		confirm_choice = 0;
+		ST7789_Fill_Color(BLACK);
+		DifficultyBomb();
+	}
 }
 
 void DifficultyBomb (void)
 {
-	ST7789_WriteString(25,20," Mine Field ", Font_16x26, BLACK, CYAN);
-	ST7789_WriteString(40,75," Easy - 4 bombs ", Font_11x18, WHITE, BLACK);
-	ST7789_WriteString(90,95," (UP) ", Font_11x18, WHITE, BLACK);
-	ST7789_WriteString(30,120," Medium - 8 bombs ", Font_11x18, WHITE, BLACK);
-	ST7789_WriteString(80,145," (LEFT) ", Font_11x18, WHITE, BLACK);
-	ST7789_WriteString(40,165," Hard - 12 bombs ", Font_11x18, WHITE, BLACK);
-	ST7789_WriteString(80,185," (DOWN) ", Font_11x18, WHITE, BLACK);
-	ST7789_WriteString(60,220," Confirm (RIGHT) ", Font_7x10, WHITE, BLACK);
-	choice_bomb = 0;
-
 	while (confirm_bomb == 0)
+	{
+		ST7789_WriteString(25,20," Mine Field ", Font_16x26, BLACK, GREEN);
+		ST7789_WriteString(45,75," 4 bombs (UP) ", Font_11x18, WHITE, BLACK);
+		ST7789_WriteString(35,120," 8 bombs (LEFT) ", Font_11x18, WHITE, BLACK);
+		ST7789_WriteString(30,165," 12 bombs (DOWN) ", Font_11x18, WHITE, BLACK);
+		ST7789_WriteString(60,220," Confirm (RIGHT) ", Font_7x10, WHITE, BLACK);
+
+		if(BTNUP == 1)
+			choice_bomb = 1;
+
+		else if(BTNLEFT == 1)
+			choice_bomb = 2;
+
+		else if(BTNDOWN == 1)
+			choice_bomb = 3;
+
+		switch(choice_bomb)
 		{
+			case 1:
+				ST7789_WriteString(45,75," 4 bombs (UP) ", Font_11x18, BLACK, LIGHTGREEN);
+			break;
 
-			if(BTNUP == 1)
-			{
-				choice_bomb = 1;
-			}
-			else if(BTNLEFT == 1)
-			{
-				choice_bomb = 2;
-			}
-			else if(BTNDOWN == 1)
-			{
-				choice_bomb = 3;
-			}
+			case 2:
+				ST7789_WriteString(35,120," 8 bombs (LEFT) ", Font_11x18, BLACK, LIGHTGREEN);
+			break;
 
-			switch(choice_bomb)
-			{
-				case 1:
-					ST7789_WriteString(40,75," Easy - 4 bombs ", Font_11x18, BLACK, CYAN);
-					ST7789_WriteString(30,120," Medium - 8 bombs ", Font_11x18, WHITE, BLACK);
-					ST7789_WriteString(40,165," Hard - 12 bombs ", Font_11x18, WHITE, BLACK);
-				break;
-
-				case 2:
-					ST7789_WriteString(30,120," Medium - 8 bombs ", Font_11x18, BLACK, CYAN);
-					ST7789_WriteString(40,75," Easy - 4 bombs ", Font_11x18, WHITE, BLACK);
-					ST7789_WriteString(40,165," Hard - 12 bombs ", Font_11x18, WHITE, BLACK);
-				break;
-
-				case 3:
-					ST7789_WriteString(40,165," Hard - 12 bombs ", Font_11x18, BLACK, CYAN);
-					ST7789_WriteString(30,120," Medium - 8 bombs ", Font_11x18, WHITE, BLACK);
-					ST7789_WriteString(40,75," Easy - 4 bombs ", Font_11x18, WHITE, BLACK);
-				break;
-			}
-
-			if(BTNRIGHT == 1)
-			{
-				confirm_bomb = 1;
-			}
+			case 3:
+				ST7789_WriteString(30,165," 12 bombs (DOWN) ", Font_11x18, BLACK, LIGHTGREEN);
+			break;
 		}
-		if(choice_bomb == 1 && confirm_bomb == 1)
-		{
-			confirm_bomb = 0;
-			ST7789_Fill_Color(BLACK);
-			MainMenu();
-		}
-		else if (choice_bomb == 2 && confirm_bomb == 1)
-		{
-			confirm_bomb = 0;
-			ST7789_Fill_Color(BLACK);
-			MainMenu();
 
-		}
-		else if (choice_bomb == 3 && confirm_bomb == 1)
-		{
-			confirm_bomb = 0;
-			ST7789_Fill_Color(BLACK);
-			MainMenu();
-		}
+		if(BTNRIGHT == 1)
+			confirm_bomb = 1;
+	}
+
+	if(choice_bomb == 1 && confirm_bomb == 1)
+	{
+		confirm_bomb = 0;
+		bombs = 4;
+		ST7789_Fill_Color(BLACK);
+		MainMenu();
+	}
+
+	else if (choice_bomb == 2 && confirm_bomb == 1)
+	{
+		confirm_bomb = 0;
+		bombs = 8;
+		ST7789_Fill_Color(BLACK);
+		MainMenu();
+	}
+
+	else if (choice_bomb == 3 && confirm_bomb == 1)
+	{
+		confirm_bomb = 0;
+		bombs = 12;
+		ST7789_Fill_Color(BLACK);
+		MainMenu();
+	}
+
 }
-void MineField (void)
+
+void DrawBomb (void)
 {
-	//ST7789_DrawFilledRectangle(0, 0, 240, 30, GREEN);
-	//ST7789_DrawFilledRectangle(0, 30, 5, 210, GREEN);
-	//ST7789_DrawFilledRectangle(235, 30, 240, 240, GREEN);
-	ST7789_DrawFilledRectangle(0, 235, 240, 240, GREEN);
+	for (int k = 0; k < bombs; k++)
+	{
+		do
+		{
+		x_bomb = rand() % 6 + 1;
+		y_bomb = (rand() % (7 - 2 + 1)) + 2;
+		}
+		while (CheckCoord(x_bomb, y_bomb));
 
+		coord_bombs[k][0] = x_bomb;
+		coord_bombs[k][1] = x_bomb;
+
+		ST7789_DrawFilledRectangle((x_bomb*30), (y_bomb*30), 30, 30, MAGENTA);
+	}
+	HAL_Delay(10000);
 }
+
+int CheckCoord (int x, int y)
+{
+	for (int l = 0; l < bombs; l++)
+	{
+		if (coord_bombs[l][0] == x && coord_bombs[l][1])
+			return 1;
+	}
+}
+void DrawMineField (void)
+{
+	for(i=0; i<=7; i++)
+	{
+		for(j=0; j<=7; j++)
+		{
+			if((i+j) % 2 == 0)
+			{
+				ST7789_DrawFilledRectangle(i*30, j*30, 30, 30, GREEN);
+			}
+			else
+			{
+				ST7789_DrawFilledRectangle(i*30, j*30, 30, 30, LIGHTGREEN);
+			}
+		}
+	}
+		ST7789_DrawFilledRectangle(0, 0, 240, 30, BRRED);
+}
+
 void BombMark (void)
 {
 
 }
+
 void Win (void)
 {
 
 }
+
 void Lose (void)
 {
 
 }
-
 /* USER CODE END 4 */
 
 /**
